@@ -19,6 +19,7 @@
 *.exe
 *.out
 *.app
+farm
 
 # CMake related files
 CMakeCache.txt
@@ -29,6 +30,7 @@ install_manifest.txt
 
 # Output dir
 bin/
+build/
 
 # OS ignores
 .DS_Store
