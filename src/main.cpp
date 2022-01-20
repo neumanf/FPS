@@ -125,11 +125,9 @@ static void display(void) {
     // Parede esquerda
     glPushMatrix();
     for (int i = 0; i < LOGQUANTITY + 1; i++) {
-        //ствол
         glBindTexture(GL_TEXTURE_2D, texture[1]);
 
         gluCylinder(cylinder, .3, .3, LOGLENGTH, 30, 30);
-        //основание ствола
         glBindTexture(GL_TEXTURE_2D, texture[2]);
         gluDisk(disk, 0, .3, 30, 30);
         glTranslatef(0, 0, LOGLENGTH);
@@ -143,10 +141,9 @@ static void display(void) {
     // Parede direita
     glTranslatef(5, 0, 0);
     for (int i = 0; i < LOGQUANTITY + 1; i++) {
-        //ствол
         glBindTexture(GL_TEXTURE_2D, texture[1]);
+
         gluCylinder(cylinder, .3, .3, LOGLENGTH, 30, 30);
-        //основание ствола
         glBindTexture(GL_TEXTURE_2D, texture[2]);
         gluDisk(disk, 0, .3, 30, 30);
         glTranslatef(0, 0, LOGLENGTH);
@@ -207,6 +204,7 @@ static void display(void) {
     glVertex3f(ROOF2);
     glTexCoord2f(.5, 1);
     glVertex3f(ROOF0);
+
     // Direita
     glNormal3f(0, -1, 1);
     glTexCoord2f(0, 0);
@@ -215,6 +213,7 @@ static void display(void) {
     glVertex3f(ROOF3);
     glTexCoord2f(.5, 1);
     glVertex3f(ROOF0);
+
     // Traseira
     glNormal3f(-1, 0, -1);
     glTexCoord2f(0, 0);
@@ -223,6 +222,7 @@ static void display(void) {
     glVertex3f(ROOF4);
     glTexCoord2f(.5, 1);
     glVertex3f(ROOF0);
+
     // Esquerda
     glNormal3f(0, 1, 1);
     glTexCoord2f(0, 0);
