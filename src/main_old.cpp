@@ -1,10 +1,9 @@
 #include <GL/gl.h>
+#include <GL/glu.h>
 #include <GL/glut.h>
 #include <SOIL/SOIL.h>
-#include <math.h>
-
-#define FPS 60
-#define TO_RADIANS 3.14 / 180.0
+#include <iostream>
+#include <stdlib.h>
 
 #define LOGLENGTH 6
 #define LOGQUANTITY 6
@@ -25,99 +24,27 @@
 
 GLuint texture[15];
 
-// width and height of the window ( Aspect ratio 16:9 )
-const int width = 1280; // 16 * 50;
-const int height = 720; // 9 * 50;
-
-float pitch = 0.0, yaw = 0.0;
-float camX = 0.0, camZ = 0.0;
+float viewX = 0;
+float viewY = 10;
+float viewZ = 15;
 
 float millAngle = 0;
 
-void display();
-void reshape(int w, int h);
-void timer(int);
-void passive_motion(int, int);
-void camera();
-void keyboard(unsigned char key, int x, int y);
-void keyboard_up(unsigned char key, int x, int y);
+void reshape(int w, int h) {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(55, 1.777777, 1, 50);
 
-struct Motion {
-    bool Forward, Backward, Left, Right;
-};
-
-Motion motion = {false, false, false, false};
-
-void init() {
-    glutSetCursor(GLUT_CURSOR_NONE);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glutWarpPointer(width / 2, height / 2);
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
-int main(int argc, char **argv) {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(width, height);
-    glutCreateWindow("Projectile Motion - 3D Simulation");
+static void display(void) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
 
-    init();
-    glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
-    glutPassiveMotionFunc(passive_motion);
-    glutTimerFunc(
-        0, timer,
-        0); // more info about this is given below at definition of timer()
-    glutKeyboardFunc(keyboard);
-    glutKeyboardUpFunc(keyboard_up);
-
-    texture[0] = SOIL_load_OGL_texture(
-        "assets/images/biggrass.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT);
-    texture[1] = SOIL_load_OGL_texture(
-        "assets/images/log1.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT);
-    texture[2] = SOIL_load_OGL_texture(
-        "assets/images/cut.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT);
-    texture[3] = SOIL_load_OGL_texture(
-        "assets/images/roof.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT);
-    texture[4] = SOIL_load_OGL_texture(
-        "assets/images/planks.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT);
-    texture[5] = SOIL_load_OGL_texture(
-        "assets/images/bricks.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT);
-    texture[6] = SOIL_load_OGL_texture(
-        "assets/images/grain.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT);
-    texture[7] = SOIL_load_OGL_texture(
-        "assets/images/darkgrain.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT);
-    texture[8] = SOIL_load_OGL_texture(
-        "assets/images/metal.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT);
-
-    glutMainLoop();
-    return 0;
-}
-
-/* This function just draws the scene. I used Texture mapping to draw
-   a chessboard like surface. If this is too complicated for you ,
-   you can just use a simple quadrilateral */
-
-void draw() {
-    glEnable(GL_TEXTURE_2D);
+    gluLookAt(viewX, viewY, viewZ, 0, 0, 3, 0, 0, 1);
 
     // Iluminação
     glEnable(GL_LIGHT1);
@@ -169,54 +96,28 @@ void draw() {
     // Grama
     glBindTexture(GL_TEXTURE_2D, texture[0]);
 
+    gluDisk(disk, 0, 15, 50, 50);
+
+    /*glTexParameteri(GL_TEXTURE_2D,
+            GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,
+            GL_TEXTURE_WRAP_T, GL_REPEAT);
     glBegin(GL_QUADS);
+            glTexCoord2f(0, 0);
+            glVertex3f(-10, -10, 0.);
+            glTexCoord2f(10, 0);
+            glVertex3f(10, -10, 0.);
+            glTexCoord2f(10, 10);
+            glVertex3f(10, 10, 0.);
+            glTexCoord2f(0, 10);
+            glVertex3f(-10, 10, 0.);
+    glEnd();*/
 
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(-50.0, -5.0, -50.0);
-    glTexCoord2f(25.0, 0.0);
-    glVertex3f(50.0, -5.0, -50.0);
-    glTexCoord2f(25.0, 25.0);
-    glVertex3f(50.0, -5.0, 50.0);
-    glTexCoord2f(0.0, 25.0);
-    glVertex3f(-50.0, -5.0, 50.0);
-
-    glEnd();
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    // Lâmpada
     glPushMatrix();
-    glTranslatef(-5, -5, 0);
-    glRotatef(-90, 1, 0, 0);
-    glBindTexture(GL_TEXTURE_2D, texture[8]);
-    gluCylinder(cylinder, .2, .15, .25, 20, 20);
-    glTranslatef(0, 0, .25);
-    gluCylinder(cylinder, .15, .15, 3, 20, 20);
-    glTranslatef(0, 0, 3);
-    gluCylinder(cylinder, .15, .2, .1, 20, 20);
-    gluCylinder(cylinder, .03, .03, .2, 10, 5);
-    glPopMatrix();
-
-    glTranslatef(-5, -1.5, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    GLfloat material_emission9[] = {.7, .6, .3, 1};
-    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, material_emission9);
-    gluSphere(sphere, .2, 40, 40);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, material_emission);
-
-    glDisable(GL_LIGHTING);
-    glColor4f(.7, .7, .7, .2);
-    gluSphere(sphere, .32, 40, 40);
-    gluSphere(sphere, .35, 40, 40);
-    glColor4f(1, 1, 1, 1);
-    glEnable(GL_LIGHTING);
 
     // Casa
-    glTranslatef(2, 0.5, 0);
-    // glRotatef(90, 1, 0, 0);
+    glTranslatef(2, 2, 0);
+    glRotatef(-90, 1, 0, 0);
 
     GLfloat material1_specular[] = {0, 0, 0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material1_specular);
@@ -291,8 +192,6 @@ void draw() {
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material_specular);
 
     // Teto
-    glTranslatef(-7, -3, 8);
-    glRotatef(-90, 1, 0, 0);
     glFrontFace(GL_CW);
     glBindTexture(GL_TEXTURE_2D, texture[3]);
     glBegin(GL_TRIANGLES);
@@ -350,10 +249,7 @@ void draw() {
     glVertex3f(ROOF1);
     glEnd();
 
-    glDisable(GL_LIGHT1);
-    glDisable(GL_LIGHT2);
-
-    // Chaminé
+    // Tubo
     glPushMatrix();
     glTranslatef(3.3, 5, 5);
     glRotatef(45, 0, 0, 1);
@@ -393,6 +289,8 @@ void draw() {
     glPushMatrix();
     glRotatef(90, 1, 0, 0);
 
+    /*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);*/
     for (int i = 0; i < 4; i++) {
         gluCylinder(cylinder, .1, 0, 3, 10, 10);
         // Inclinar
@@ -474,130 +372,145 @@ void draw() {
     glPopMatrix();
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material_specular);
+    // Lâmpada
+    glPushMatrix();
+    glTranslatef(-5, 5, 0);
+    glBindTexture(GL_TEXTURE_2D, texture[8]);
+    gluCylinder(cylinder, .2, .15, .25, 20, 20);
+    glTranslatef(0, 0, .25);
+    gluCylinder(cylinder, .15, .15, 3, 20, 20);
+    glTranslatef(0, 0, 3);
+    gluCylinder(cylinder, .15, .2, .1, 20, 20);
+    gluCylinder(cylinder, .03, .03, .2, 10, 5);
+    glPopMatrix();
 
+    glTranslatef(-5, 5, 3.64);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    GLfloat material_emission9[] = {.7, .6, .3, 1};
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, material_emission9);
+    gluSphere(sphere, .2, 40, 40);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, material_emission);
+
+    glDisable(GL_LIGHTING);
+    glColor4f(.7, .7, .7, .2);
+    gluSphere(sphere, .32, 40, 40);
+    gluSphere(sphere, .35, 40, 40);
+    glColor4f(1, 1, 1, 1);
+    glEnable(GL_LIGHTING);
+
+    glDisable(GL_LIGHT1);
+    glDisable(GL_LIGHT2);
     gluDeleteQuadric(cylinder);
     gluDeleteQuadric(disk);
     gluDeleteQuadric(sphere);
-
-    glDisable(GL_TEXTURE_2D);
-}
-
-void display() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-
-    camera();
-    draw();
-
     glutSwapBuffers();
 }
 
-void reshape(int w, int h) {
-    glViewport(0, 0, w, h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(60, 16.0 / 9.0, 1, 75);
-    glMatrixMode(GL_MODELVIEW);
-}
-
-/*this funtion is used to keep calling the display function periodically
-  at a rate of FPS times in one second. The constant FPS is defined above and
-  has the value of 60
-*/
-void timer(int) {
-    glutPostRedisplay();
-    glutWarpPointer(width / 2, height / 2);
-    glutTimerFunc(1000 / FPS, timer, 0);
-}
-
-void passive_motion(int x, int y) {
-    /* two variables to store X and Y coordinates, as observed from the center
-      of the window
-    */
-    int dev_x, dev_y;
-    dev_x = (width / 2) - x;
-    dev_y = (height / 2) - y;
-
-    /* apply the changes to pitch and yaw*/
-    const float look_speed = 50.0;
-    yaw += (float)dev_x / look_speed;
-    pitch += (float)dev_y / look_speed;
-}
-
-void camera() {
-    const float speed = 5.0;
-
-    if (motion.Forward) {
-        camX += cos((yaw + 90) * TO_RADIANS) / speed;
-        camZ -= sin((yaw + 90) * TO_RADIANS) / speed;
-    }
-    if (motion.Backward) {
-        camX += cos((yaw + 90 + 180) * TO_RADIANS) / speed;
-        camZ -= sin((yaw + 90 + 180) * TO_RADIANS) / speed;
-    }
-    if (motion.Left) {
-        camX += cos((yaw + 90 + 90) * TO_RADIANS) / speed;
-        camZ -= sin((yaw + 90 + 90) * TO_RADIANS) / speed;
-    }
-    if (motion.Right) {
-        camX += cos((yaw + 90 - 90) * TO_RADIANS) / speed;
-        camZ -= sin((yaw + 90 - 90) * TO_RADIANS) / speed;
-    }
-
-    /*limit the values of pitch
-      between -60 and 70
-    */
-    if (pitch >= 70)
-        pitch = 70;
-    if (pitch <= -60)
-        pitch = -60;
-
-    glRotatef(-pitch, 1.0, 0.0, 0.0); // Along X axis
-    glRotatef(-yaw, 0.0, 1.0, 0.0);   // Along Y axis
-
-    glTranslatef(-camX, 0.0, -camZ);
-}
-
 void keyboard(unsigned char key, int x, int y) {
-    switch (key) {
-    case 'q':
+    if (key == 27)
         exit(0);
-    case 'W':
-    case 'w':
-        motion.Forward = true;
-        break;
-    case 'A':
+    switch (key) {
     case 'a':
-        motion.Left = true;
+        viewX++;
         break;
-    case 'S':
-    case 's':
-        motion.Backward = true;
-        break;
-    case 'D':
     case 'd':
-        motion.Right = true;
+        viewX--;
+        break;
+    case 's':
+        viewY++;
+        break;
+    case 'w':
+        viewY--;
+        break;
+    // case 101:
+    //     viewZ++;
+    //     break;
+    // case 100:
+    //     viewZ--;
+    //     break;
+    default:
         break;
     }
 }
 
-void keyboard_up(unsigned char key, int x, int y) {
+void specialkeyboard(int key, int x, int y) {
     switch (key) {
-    case 'W':
-    case 'w':
-        motion.Forward = false;
+    case GLUT_KEY_LEFT:
+        millAngle--;
         break;
-    case 'A':
-    case 'a':
-        motion.Left = false;
-        break;
-    case 'S':
-    case 's':
-        motion.Backward = false;
-        break;
-    case 'D':
-    case 'd':
-        motion.Right = false;
+    case GLUT_KEY_RIGHT:
+        millAngle++;
         break;
     }
+}
+
+int main(int argc, char **argv) {
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+    glutInit(&argc, argv);
+    glutInitWindowPosition(0, 0);
+    glutInitWindowSize(1920, 1080);
+
+    glutCreateWindow("Fazenda");
+    glutFullScreen();
+    glClearColor(1, 1, 1, 0.0);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_LIGHTING);
+    glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+    glEnable(GL_NORMALIZE);
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+    glShadeModel(GL_SMOOTH);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+    texture[0] = SOIL_load_OGL_texture(
+        "assets/images/biggrass.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    texture[1] = SOIL_load_OGL_texture(
+        "assets/images/log1.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    texture[2] = SOIL_load_OGL_texture(
+        "assets/images/cut.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    texture[3] = SOIL_load_OGL_texture(
+        "assets/images/roof.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    texture[4] = SOIL_load_OGL_texture(
+        "assets/images/planks.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    texture[5] = SOIL_load_OGL_texture(
+        "assets/images/bricks.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    texture[6] = SOIL_load_OGL_texture(
+        "assets/images/grain.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    texture[7] = SOIL_load_OGL_texture(
+        "assets/images/darkgrain.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    texture[8] = SOIL_load_OGL_texture(
+        "assets/images/metal.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+
+    glutReshapeFunc(reshape);
+    glutDisplayFunc(display);
+    glutIdleFunc(display);
+
+    glutKeyboardFunc(keyboard);
+    glutSpecialFunc(specialkeyboard);
+
+    glutMainLoop();
+
+    return EXIT_SUCCESS;
 }
