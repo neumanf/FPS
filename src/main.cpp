@@ -1,4 +1,5 @@
 #include <GL/gl.h>
+#include <GL/glu.h>
 #include <GL/glut.h>
 #include <SOIL/SOIL.h>
 #include <math.h>
@@ -105,6 +106,10 @@ int main(int argc, char **argv) {
             SOIL_FLAG_COMPRESS_TO_DXT);
     texture[8] = SOIL_load_OGL_texture(
         "assets/images/metal.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    texture[9] = SOIL_load_OGL_texture(
+        "assets/images/hay.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
         SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
             SOIL_FLAG_COMPRESS_TO_DXT);
 
@@ -474,6 +479,24 @@ void draw() {
     glPopMatrix();
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material_specular);
+
+    // Feno
+    glPushMatrix();
+    const float BASE = 1.5, TOP = 1.5, HEIGHT = 2.5, SLICES = 20.0,
+                STACKS = 20.0;
+
+    glTranslatef(3, -4, -1);
+    glBindTexture(GL_TEXTURE_2D, texture[9]);
+
+    gluCylinder(cylinder, BASE, TOP, HEIGHT, 20.0, STACKS);
+    glRotatef(180, 1, 0, 0);
+    gluDisk(cylinder, 0.0f, BASE, SLICES, 1);
+    glRotatef(180, 1, 0, 0);
+    glTranslatef(0.0f, 0.0f, HEIGHT);
+    gluDisk(cylinder, 0.0f, TOP, SLICES, 1);
+    glTranslatef(0.0f, 0.0f, -HEIGHT);
+
+    glPopMatrix();
 
     gluDeleteQuadric(cylinder);
     gluDeleteQuadric(disk);
