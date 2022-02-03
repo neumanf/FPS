@@ -1,3 +1,4 @@
+#include <GL/freeglut_std.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
@@ -263,15 +264,35 @@ void draw() {
 
     // Parede frontal
     for (int i = 0; i < LOGQUANTITY; i++) {
+        float LOG_LENGTH = i == 0 ? 6 : 2.1;
         // Tronco
         glBindTexture(GL_TEXTURE_2D, texture[1]);
-        gluCylinder(cylinder, .3, .3, LOGLENGTH, 30, 30);
+        gluCylinder(cylinder, .3, .3, LOG_LENGTH, 30, 30);
 
         glBindTexture(GL_TEXTURE_2D, texture[2]);
         gluDisk(disk, 0, .3, 30, 30);
-        glTranslatef(0, 0, LOGLENGTH);
+        glTranslatef(0, 0, LOG_LENGTH);
         gluDisk(disk, 0, .3, 30, 30);
-        glTranslatef(0, 0, -LOGLENGTH);
+        glTranslatef(0, 0, -LOG_LENGTH);
+        glTranslatef(0, -.6, 0);
+    }
+
+    glTranslatef(0, 3, 3.9);
+
+    for (int i = 0; i < LOGQUANTITY; i++) {
+        if (i == 0)
+            continue;
+
+        float LOG_LENGTH = 2.1;
+        // Tronco
+        glBindTexture(GL_TEXTURE_2D, texture[1]);
+        gluCylinder(cylinder, .3, .3, LOG_LENGTH, 30, 30);
+
+        glBindTexture(GL_TEXTURE_2D, texture[2]);
+        gluDisk(disk, 0, .3, 30, 30);
+        glTranslatef(0, 0, LOG_LENGTH);
+        gluDisk(disk, 0, .3, 30, 30);
+        glTranslatef(0, 0, -LOG_LENGTH);
         glTranslatef(0, -.6, 0);
     }
     glPopMatrix();
@@ -340,7 +361,7 @@ void draw() {
     glEnd();
     glFrontFace(GL_CCW);
 
-    // Teto
+    // Parte de baixo do teto
     glBindTexture(GL_TEXTURE_2D, texture[4]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
