@@ -6,9 +6,10 @@ Cenário 3D de uma fazenda utilizando OpenGL. O usuário é capaz de andar livre
 
 ## Dependências
 
--   g++
--   GLUT
--   SOIL
+-   **g++**
+-   **OpenGL** - *API para Computação Gráfica*
+-   **GLUT** - *Criação e controle de janelas*
+-   **SOIL** - *Carregar as texturas*
 
 ## Build
 
