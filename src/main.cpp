@@ -4,6 +4,13 @@
 #include <SOIL/SOIL.h>
 #include <math.h>
 
+#define SKY_FRONT 0
+#define SKY_RIGHT 1
+#define SKY_LEFT 2
+#define SKY_BACK 3
+#define SKY_UP 4
+#define SKY_DOWN 5
+
 #define FPS 60
 #define TO_RADIANS 3.14 / 180.0
 
@@ -24,8 +31,11 @@
 #define BLADE6 1, .08, 5.5
 #define BLADE7 -1, .08, 5.5
 
-// Vetor de texturas
+// Vetor de texturas dos objetos
 GLuint texture[15];
+
+// Veetor de texturas do céu
+int skybox[6];
 
 // Dimensões da janela
 const int width = 1280; // 16 * 50;
@@ -470,8 +480,87 @@ void drawPole(GLUquadricObj *cylinder, GLUquadricObj *sphere,
     glEnable(GL_LIGHTING);
 }
 
+// Desenha o céu
+void drawSkybox(double D) {
+    float white[] = {1, 1, 1, 1};
+    glColor3fv(white);
+
+    // Lados
+    glBindTexture(GL_TEXTURE_2D, skybox[SKY_RIGHT]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex3f(-D, -D, -D);
+    glTexCoord2f(1, 0);
+    glVertex3f(+D, -D, -D);
+    glTexCoord2f(1, 1);
+    glVertex3f(+D, +D, -D);
+    glTexCoord2f(0, 1);
+    glVertex3f(-D, +D, -D);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, skybox[SKY_FRONT]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex3f(+D, -D, -D);
+    glTexCoord2f(1, 0);
+    glVertex3f(+D, -D, +D);
+    glTexCoord2f(1, 1);
+    glVertex3f(+D, +D, +D);
+    glTexCoord2f(0, 1);
+    glVertex3f(+D, +D, -D);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, skybox[SKY_LEFT]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex3f(+D, -D, +D);
+    glTexCoord2f(1, 0);
+    glVertex3f(-D, -D, +D);
+    glTexCoord2f(1, 1);
+    glVertex3f(-D, +D, +D);
+    glTexCoord2f(0, 1);
+    glVertex3f(+D, +D, +D);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, skybox[SKY_BACK]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex3f(-D, -D, +D);
+    glTexCoord2f(1, 0);
+    glVertex3f(-D, -D, -D);
+    glTexCoord2f(1, 1);
+    glVertex3f(-D, +D, -D);
+    glTexCoord2f(0, 1);
+    glVertex3f(-D, +D, +D);
+    glEnd();
+
+    // Topo e fundo
+    glBindTexture(GL_TEXTURE_2D, skybox[SKY_UP]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex3f(-D, +D, -D);
+    glTexCoord2f(1, 0);
+    glVertex3f(+D, +D, -D);
+    glTexCoord2f(1, 1);
+    glVertex3f(+D, +D, +D);
+    glTexCoord2f(0, 1);
+    glVertex3f(-D, +D, +D);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, skybox[SKY_DOWN]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(1, 1);
+    glVertex3f(+D, -D, -D);
+    glTexCoord2f(0, 1);
+    glVertex3f(-D, -D, -D);
+    glTexCoord2f(0, 0);
+    glVertex3f(-D, -D, +D);
+    glTexCoord2f(1, 0);
+    glVertex3f(+D, -D, +D);
+    glEnd();
+}
+
 void draw() {
     glEnable(GL_TEXTURE_2D);
+
+    // Textura do céu
+    drawSkybox(35);
 
     // Iluminação global
     glEnable(GL_LIGHT1);
@@ -762,6 +851,32 @@ int main(int argc, char **argv) {
             SOIL_FLAG_COMPRESS_TO_DXT);
     texture[9] = SOIL_load_OGL_texture(
         "assets/images/hay.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+
+    // Carrega texturas do céu
+    skybox[SKY_FRONT] = SOIL_load_OGL_texture(
+        "assets/images/nightsky_west.bmp", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    skybox[SKY_RIGHT] = SOIL_load_OGL_texture(
+        "assets/images/nightsky_south.bmp", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    skybox[SKY_LEFT] = SOIL_load_OGL_texture(
+        "assets/images/nightsky_north.bmp", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    skybox[SKY_BACK] = SOIL_load_OGL_texture(
+        "assets/images/nightsky_east.bmp", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    skybox[SKY_UP] = SOIL_load_OGL_texture(
+        "assets/images/nightsky_up.bmp", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT);
+    skybox[SKY_DOWN] = SOIL_load_OGL_texture(
+        "assets/images/nightsky_down.bmp", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
         SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB |
             SOIL_FLAG_COMPRESS_TO_DXT);
 
