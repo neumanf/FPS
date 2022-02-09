@@ -137,13 +137,13 @@ void drawMill(GLUquadricObj *cylinder, GLUquadricObj *disk,
         gluCylinder(cylinder, .1, 0, 3, 10, 10);
         // Inclinar
         glPushMatrix();
-        //Rotaciona 15 em Z (curva na palheta ????)
+        //Rotaciona 15 em Z, curva na palheta
         glRotatef(15, 0, 0, 1);
         //polígonos voltados para frente e para trás
         glFrontFace(GL_CW);
 
         glBegin(GL_QUADS);
-        //Desenha a lamina ?????????
+        //Desenha a lamina
         glNormal3f(0, 1, 0);
         glTexCoord2f(0, 0);
         glVertex3f(BLADE0);
@@ -367,7 +367,7 @@ void drawHouse(GLUquadricObj *cylinder, GLUquadricObj *disk,
 
     // Parte de baixo do teto
     glBindTexture(GL_TEXTURE_2D, texture[4]);
-    //------ nao consegui entender, sei que mexe algo com a textura
+    //Repete a textura
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     //Cria um objeto do tipo quadrado
@@ -396,13 +396,13 @@ void drawHouse(GLUquadricObj *cylinder, GLUquadricObj *disk,
     //Parte de dentro
     gluCylinder(cylinder, .3, .3, 2, 4, 4);
     glTranslatef(0, 0, 2);
-    //-----------Disco de que??
+    //Parte inferior da chaminé
     gluDisk(disk, .3, .5, 4, 4);
     glPopMatrix();
 }
-//Desenha o piso da casa 
+//Desenha a grama
 void drawFloor() {
-    //Textura do piso
+    //Textura da grama
     glBindTexture(GL_TEXTURE_2D, texture[0]);
     //Quadrilatero
     glBegin(GL_QUADS);
@@ -417,7 +417,7 @@ void drawFloor() {
     glVertex3f(-50.0, -5.0, 50.0);
 
     glEnd();
-    //----------------------nao sei
+    //Repete a textura
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -471,7 +471,7 @@ void draw() {
     // Lua
     GLfloat pos1[] = {1, -1, -1, 0};
     GLfloat light1_diffuse[] = {.7, .7, .7, 1};
-    GLfloat light1_specular[] = {.2, .2, .2, 1};
+    GLfloat light1_specular[] = {.2, .2, .2, 1};    
     glLightfv(GL_LIGHT1, GL_POSITION, pos1);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_diffuse);
     glLightfv(GL_LIGHT1, GL_SPECULAR, light1_specular);
@@ -480,7 +480,7 @@ void draw() {
     GLfloat light2_position[] = {-5, 5, 3.64, 1};
     GLfloat light2_diffuse[] = {.9, .7, .5, 1};
     GLfloat light2_specular[] = {.3, .2, .1, 1};
-    GLfloat light2_linear_attenuation[] = {.015};
+    GLfloat light2_linear_attenuation[] = {.015};    
     glLightfv(GL_LIGHT2, GL_DIFFUSE, light2_diffuse);
     glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
     glLightfv(GL_LIGHT2, GL_SPECULAR, light2_specular);
@@ -491,6 +491,7 @@ void draw() {
     GLfloat material_ambient[] = {.5, .5, .5, 1.0};
     GLfloat material_specular[] = {.1, .1, .1, 1.0};
     GLfloat material1_specular[] = {0, 0, 0, 1.0};
+    //Difusa+ambiente+especular = Phong Reflexion
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, material_emission);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material_diffuse);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, material_ambient);
@@ -546,6 +547,12 @@ void draw() {
     glDisable(GL_TEXTURE_2D);
 }
 
+/*
+Caso alguma dessas direções seja verdadeira, indica que a tecla que corresponde 
+a essa direção foi pressionada e portanto as posições da câmera nos eixos X e Z, 
+expressas pelas variáveis camX e camZ, devem ser alteradas. Por fim, são realizadas 
+as rotações e translações pertinentes
+*/
 void camera() {
     const float speed = 5.0;
 
@@ -577,6 +584,11 @@ void camera() {
     glTranslatef(-camX, 0.0, -camZ);
 }
 
+/*
+determina o que será mostrado na janela. Nela são limpados os buffers, 
+redefinida a matriz atual de volta ao seu estado padrão,  chamadas as 
+funções camera() e draw() e, por fim, trocados os conteúdos dos buffers de trás e frente.
+*/
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -586,7 +598,10 @@ void display() {
 
     glutSwapBuffers();
 }
-
+/*
+garante que ao modificar o tamanho da janela, o conteúdo seja exibido de forma correta, 
+para tanto, modifica a perspectiva da cena para se adequar aos novos valores de altura e largura
+*/
 void reshape(int w, int h) {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
