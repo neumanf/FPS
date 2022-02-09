@@ -7,9 +7,9 @@ Cenário 3D de uma fazenda utilizando OpenGL. O usuário é capaz de andar livre
 ## Dependências
 
 -   **g++**
--   **OpenGL** - *API para Computação Gráfica*
--   **GLUT** - *Criação e controle de janelas*
--   **SOIL** - *Carregar as texturas*
+-   **OpenGL** - _API para Computação Gráfica_
+-   **GLUT** - _Criação e controle de janelas_
+-   **SOIL** - _Carregamento de texturas_
 
 ## Build
 
@@ -32,10 +32,12 @@ $ ./farm
 
 ## Controles
 
-| Atalho | Ação                             |
-| ------ | -------------------------------- |
-| W      | Movimenta a câmera para frente   |
-| A      | Movimenta a câmera para esquerda |
-| S      | Movimenta a câmera para trás     |
-| D      | Movimenta a câmera para direita  |
-| Q      | Fecha a aplicação                |
+| Atalho | Ação                                            |
+| ------ | ----------------------------------------------- |
+| W      | Movimenta a câmera para frente                  |
+| A      | Movimenta a câmera para esquerda                |
+| S      | Movimenta a câmera para trás                    |
+| D      | Movimenta a câmera para direita                 |
+| ->     | Gira a hélice do moinho no sentido horário      |
+| <-     | Gira a hélice do moinho no sentido anti-horário |
+| Q      | Fecha a aplicação                               |

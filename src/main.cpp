@@ -590,6 +590,21 @@ void keyboard_up(unsigned char key, int x, int y) {
     }
 }
 
+/*
+Recebe input de teclas especiais do teclado
+como F1, setas, page up, etc.
+*/
+void specialkeyboard(int key, int x, int y) {
+    switch (key) {
+    case GLUT_KEY_LEFT:
+        millAngle--;
+        break;
+    case GLUT_KEY_RIGHT:
+        millAngle++;
+        break;
+    }
+}
+
 int main(int argc, char **argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -603,6 +618,7 @@ int main(int argc, char **argv) {
     glutTimerFunc(0, timer, 0);
     glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboard_up);
+    glutSpecialFunc(specialkeyboard);
 
     // Carrega as texturas
     texture[0] = SOIL_load_OGL_texture(
