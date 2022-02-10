@@ -719,12 +719,16 @@ void timer(int) {
     glutTimerFunc(1000 / FPS, timer, 0);
 }
 
-// Controla a velocidade do movimento da câmera
+// Modifica yam e pitch de acordo com o movimento da câmera
 void passive_motion(int x, int y) {
+     /* duas variáveis para armazenar as coordenadas X e Y, conforme observado do centro
+      da janela
+    */
     int dev_x, dev_y;
     dev_x = (width / 2) - x;
     dev_y = (height / 2) - y;
 
+    /* aplica as mudanças no pitch e yaw*/
     const float look_speed = 50.0;
     yaw += (float)dev_x / look_speed;
     pitch += (float)dev_y / look_speed;
